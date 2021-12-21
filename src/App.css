@@ -1,0 +1,20 @@
+@keyframes example {
+  from {right:-500px}
+  to {right: 0;}
+}
+.toastShowError{
+  z-index: 99;
+  position: fixed;
+  right: 0;
+  background-color: #dc3545;
+  animation-name: example;
+  animation-duration: .5s;
+}
+.toastShowSuccess{
+  z-index: 99;
+  position: fixed;
+  right: 0;
+  background-color: #198754;
+  animation-name: example;
+  animation-duration: .5s;
+}
