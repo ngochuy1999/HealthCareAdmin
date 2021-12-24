@@ -42,9 +42,18 @@ function TestResult(props) {
                         <td>{++index}</td>
                         <td>{rs.diagnostic}</td>
                         <td>{rs.isPay == 0 ? 'chưa thanh toán' : (rs.isPay === 1 ? 'đang tiến hành' : 'đã hoàn thành')}</td>
-                        {rs.isPay == 1 ? (<td onClick={() => { setInfo({ ...info, show: true, id: rs.id }) }}>
+                        {rs.isPay == 1 ? (<td onClick={() => {
+                            var admin = JSON.parse(localStorage.getItem('admin'));
+                            axios.post(`/admin/test-result?doctorId=${admin.accountId}&testFormId=${rs.id}`)
+                                .then(res => {
+                                    setInfo({ ...info, show: true, id: rs.id, resultId: res.data.data.resultId, testFormId: res.data.data.testForm.id })
+                                });
+
+                        }}>
                             <i class="fas fa-arrow-circle-right"></i>
-                        </td>) : (<td onClick={() => { setInfo({ ...info, show: true, id: rs.id }) }}>
+                        </td>) : (<td onClick={() => {
+                            setInfo({ ...info, show: true, id: rs.id })
+                        }}>
 
                         </td>)}
 

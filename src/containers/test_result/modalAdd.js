@@ -1,66 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import Input from './../../components/UI/Input';
 import { Modal, Button, Form, Table, Col } from 'react-bootstrap';
-import axios from '../../helpers/axios';
+import axios from 'axios';
 import { ROOT } from '../../actions/constants';
+import ItemAdd from './itemAdd';
 
 function ModalAdd(props) {
     const [test, setTest] = useState({
-        conclude: '',
-        imageUrl: '',
-        fileUrl: ''
+
     });
+    const [FileList, setFileList] = useState({ length: 3 });
+    const [ImageList, setImageList] = useState({ length: 3 });
     const [arrTest, setArrTest] = useState([]);
     let onChange = (e) => {
         let target = e.target;
         let name = target.name;
         let value = target.type === 'checkbox' ? target.checked : target.value;
-        value = target.type === 'file' ? target.files[0] : value;
+        value = target.type === 'file' ? target.files : value;
         setTest({
             ...test,
             [name]: value
         });
     }
+    let onChangeImage = (e) => {
+        let target = e.target;
+        let name = target.name;
+        let value = target.type === 'checkbox' ? target.checked : target.value;
+        value = target.type === 'file' ? target.files[0] : value;
+        // console.error('value-file: ', value)
+        setImageList({
+            ...ImageList,
+            [target.dataset.index]: value
+        });
+    }
     const [validated, setValidated] = useState(false);
     let onHandleSubmit = (e) => {
-        const form = e.currentTarget;
         e.preventDefault();
-        if (form.checkValidity() === false) {
-            e.stopPropagation();
-            setValidated(true);
-            alert('Chưa thêm đầy đủ kết quả xét nghiệm!');
-        } else {
-            const admin = JSON.parse(window.localStorage.getItem('admin'));
-            const form = new FormData();
-            form.append("testFormId", props.info.id);
-            form.append("doctorId", admin.accountId);
-            form.append("conclude", test.conclude);
-            form.append("imageUrl", test.imageUrl);
-            form.append("fileUrl", test.fileUrl);
-            axios.post('/admin/test-result1', form).then(res => {
-                if (res.data.status) {
-                    alert('Thêm kết quả xét nghiệm thành công!');
-                    props.handleShow();
-                } else {
-                    alert('Thêm kết quả xét nghiệm thất bại!')
-                }
-            })
-        }
+        console.error('test111: ', props.testFormId)
+        axios.put(`http://192.168.43.158:8080/api/admin/done-result?testFormId=${props.info.testFormId}`).then(res => {
+            console.error('test: ', res)
+            if (res.data.status) {
+                alert('Thêm kết quả xét nghiệm thành công!');
+                props.handleShow();
+            } else {
+                alert('Thêm kết quả xét nghiệm thất bại!')
+            }
+        })
     }
     useEffect(() => {
-        axios.get(`/admin/subclinical-by-test?testFormId=${props.info.id}`)
-            .then(res => setArrTest(res.data))
+        axios.get(`http://192.168.43.158:8080/api/admin/subclinical-by-test?testFormId=${props.info.id}`)
+            .then(res => { setArrTest(res.data); console.error('res-data: ', res.data) })
     }, [])
     const showItems = (arrTest) => {
         let rs = null;
         if (arrTest) {
             rs = arrTest.map((test, index) => {
                 return (
-                    <tr key={index}>
-                        <td>{++index}</td>
-                        <td>{test.testName}</td>
-                        <td>{test.price}</td>
-                    </tr >
+                    <ItemAdd index={index} test={test} resultId={props.info.resultId} />
                 )
             });
         }
@@ -79,13 +75,15 @@ function ModalAdd(props) {
                                 <th>STT</th>
                                 <th>Name</th>
                                 <th>Price</th>
+                                <th>Image</th>
+                                <th>File</th>
                             </tr>
                         </thead>
                         <tbody>
                             {showItems(arrTest)}
                         </tbody>
                     </Table>
-                    <Col xs={12} md={12}>
+                    {/* <Col xs={12} md={12}>
                         <Input
                             value={test.conclude}
                             placeholder={`...`}
@@ -93,25 +91,7 @@ function ModalAdd(props) {
                             label={`Kết quả xét nghiệm:`}
                             onChange={(e) => onChange(e)}
                         />
-                    </Col>
-                    <Col xs={12} md={12}>
-                        <Input
-                            placeholder={`...`}
-                            type="file"
-                            name="imageUrl"
-                            label={`Hình ảnh xét nghiệm:`}
-                            onChange={(e) => onChange(e)}
-                        />
-                    </Col>
-                    <Col xs={12} md={12}>
-                        <Input
-                            placeholder={`...`}
-                            type="file"
-                            name="fileUrl"
-                            label={`File xét nghiệm:`}
-                            onChange={(e) => onChange(e)}
-                        />
-                    </Col>
+                    </Col> */}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="light" onClick={props.handleShow}>

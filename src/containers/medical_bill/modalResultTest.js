@@ -11,7 +11,7 @@ function ModalResultTest(props) {
   useEffect(() => {
     axios.get(`/admin/test-form?billId=${props.info.id}`)
       .then(res => setRsTest( res.data))
-  })
+  },[])
   const handleShow = () => setInfo({
     ...info,
     show: !info.show

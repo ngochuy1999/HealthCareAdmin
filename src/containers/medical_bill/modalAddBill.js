@@ -4,6 +4,10 @@ import { Modal, Button, Form, Container, Row, Col } from 'react-bootstrap';
 import axios from '../../helpers/axios';
 
 function ModalAddBill(props) {
+    const [listMedical, setListMedical] = useState([]);
+    useEffect(() => {
+        axios.get('/admin/medicine/').then(res => setListMedical(res.data))
+    }, [])
     const [medical, setMedical] = useState({
         diagnostic: '',
         needs: '',
@@ -24,9 +28,8 @@ function ModalAddBill(props) {
         });
     }
     const [testAdd, setTestAdd] = useState({
-        name: '',
+        medicineId: '',
         quantity: '',
-        dosage: ''
     });
     let onChangeAddTest = (e) => {
         let target = e.target;
@@ -53,6 +56,7 @@ function ModalAddBill(props) {
                 if (res.data.status) {
                     alert('Thêm bill thành công!');
                     props.handleShow();
+                    window.location.reload();
                 } else {
                     alert('Thêm bill thất bại!')
                 }
@@ -63,16 +67,19 @@ function ModalAddBill(props) {
         let result = null;
         if (arrTest && arrTest.length > 0) {
             result = arrTest.map((test, index) => {
+                let nameMedical = '';
+                listMedical.map((item, index) => {
+                    if (item.medicineId == test.medicineId) {
+                        nameMedical = item.medicineName;
+                    }
+                })
                 return (
                     <Row>
-                        <Col xs={3} md={3}>
-                            <p>{test.name}</p>
+                        <Col xs={6} md={6}>
+                            <p>{nameMedical}</p>
                         </Col>
-                        <Col xs={3} md={3}>
+                        <Col xs={6} md={6}>
                             <p>{test.quantity}</p>
-                        </Col>
-                        <Col xs={3} md={3}>
-                            <p>{test.dosage}</p>
                         </Col>
                     </Row>
                 );
@@ -88,9 +95,8 @@ function ModalAddBill(props) {
     const cancelTest = () => {
         setTest({ ...test, show: false })
         setTestAdd({
-            name: '',
+            medicineId: '',
             quantity: '',
-            dosage: ''
         })
     }
     const saveTest = () => {
@@ -98,11 +104,23 @@ function ModalAddBill(props) {
         arrTestAtempt.push(testAdd);
         setArrTest(arrTestAtempt);
         setTestAdd({
-            name: '',
+            medicineId: '',
             quantity: '',
-            dosage: ''
         })
         setTest({ ...test, show: false })
+    }
+    const showList = (categories) => {
+        let result = null;
+        if (categories && categories.length > 0) {
+            result = categories.map((category, index) => {
+                return (
+                    <option key={index} value={category.medicineId}>
+                        {category.medicineName}
+                    </option>
+                );
+            })
+        }
+        return result;
     }
     return (
         <Modal className="modal" size="lg" show={props.info.show} onHide={props.handleShow}>
@@ -188,30 +206,21 @@ function ModalAddBill(props) {
                                 <Button onClick={() => setTest({ ...test, show: true })} variant="primary">+</Button>
                             </Col>) : null}
                             {test.show ? (<>
-                                <Col xs={3} md={3}>
-                                    <Input
-                                        value={testAdd.name}
-                                        placeholder={`...`}
-                                        name="name"
-                                        label={`Tên thuốc:`}
-                                        onChange={(e) => onChangeAddTest(e)}
-                                    />
+                                <Col xs={6} md={6}>
+                                    <Form.Group>
+                                        <Form.Label>Chọn thuốc</Form.Label>
+                                        <Form.Control required as="select" name="medicineId" onChange={(e) => onChangeAddTest(e)}>
+                                            <option key={'empty'} value={''}>...</option>
+                                            {showList(listMedical)}
+                                        </Form.Control>
+                                    </Form.Group>
                                 </Col>
-                                <Col xs={3} md={3}>
+                                <Col xs={6} md={6}>
                                     <Input
                                         value={testAdd.quantity}
                                         placeholder={`...`}
                                         name="quantity"
                                         label={`Số lượng:`}
-                                        onChange={(e) => onChangeAddTest(e)}
-                                    />
-                                </Col>
-                                <Col xs={3} md={3}>
-                                    <Input
-                                        value={testAdd.dosage}
-                                        placeholder={`...`}
-                                        name="dosage"
-                                        label={`Liều dùng:`}
                                         onChange={(e) => onChangeAddTest(e)}
                                     />
                                 </Col>
